@@ -2,8 +2,15 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = "5.0.0"
     }
+  }
+
+  backend "azurerm" {
+    resource_group_name  = "bhakua001-rg-tfstate"
+    storage_account_name = "bhakua001tfstate"
+    container_name       = "tfstate"
+    key                  = "production.terraform.tfstate"
   }
 }
 
@@ -53,7 +60,7 @@ module "container" {
   config = {
     "default" = {
       container_name        = local.config.container_name
-      storage_account_name  = module.storage_account.storage_account_name
+      storage_account_id      = module.storage_account.storage_account_id
       container_access_type = local.config.container_access_type
     }
   }

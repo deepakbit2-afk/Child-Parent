@@ -5,6 +5,13 @@ terraform {
       version = "5.0.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "bhakua001-rg-tfstate"
+    storage_account_name = "bhakua001tfstate"
+    container_name       = "tfstate"
+    key                  = "staging.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
