@@ -1,8 +1,3 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
@@ -10,10 +5,73 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
 
+# 1. Checkout GitHub code
+- checkout: self
+  displayName: 'Checkout GitHub Code'
+
+# 2. Verify repository structure
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    echo "======================================"
+    echo "VERIFY GITHUB SOURCE"
+    echo "======================================"
+
+    echo ""
+    echo "Current directory:"
+    pwd
+
+    echo ""
+    echo "Terraform environments:"
+    find "$(System.DefaultWorkingDirectory)/pipeline/environment" \
+      -maxdepth 2 -type f \
+      \( -name "*.tf" -o -name "*.tfvars" \) | sort
+
+  displayName: 'Verify GitHub Source'
+
+# 3. Install Terraform
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y unzip curl
+
+    TERRAFORM_VERSION="1.13.3"
+
+    curl -fsSL \
+      "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+      -o /tmp/terraform.zip
+
+    unzip -o /tmp/terraform.zip -d /tmp/terraform
+
+    sudo mv /tmp/terraform/terraform /usr/local/bin/terraform
+
+    terraform version
+
+  displayName: 'Install Terraform'
+
+# 4. Terraform Format Check
+- script: |
+    terraform fmt -check -recursive
+  displayName: 'Terraform Format Check'
+
+# 5. Terraform Init - Staging
+- script: |
+    cd "$(System.DefaultWorkingDirectory)/pipeline/environment/staging"
+
+    echo "======================================"
+    echo "Terraform Init - Staging"
+    echo "======================================"
+
+    terraform init -backend=false
+
+  displayName: 'Terraform Init - Staging'
+
+# 6. Terraform Validate - Staging
+- script: |
+    cd "$(System.DefaultWorkingDirectory)/pipeline/environment/staging"
+
+    echo "======================================"
+    echo "Terraform Validate - Staging"
+    echo "======================================"
+
+    terraform validate
+
+  displayName: 'Terraform Validate - Staging'
