@@ -1,9 +1,7 @@
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate files (they can contain secrets)
-*.tfstate
-*.tfstate.*
-
-# Crash logs
-crash.log
+main.tf
+variables.tf
+variable.tf
+outputs.tf
+provider.tf
+terraform.tfvars
+.terraform.lock.hcl
