@@ -14,7 +14,7 @@ steps:
   displayName: 'Checkout GitHub Code'
 
 
-# 2. Verify source code
+# 2. Verify GitHub source
 - script: |
     echo "======================================"
     echo "GITHUB SOURCE VERIFICATION"
@@ -51,17 +51,23 @@ steps:
 
     sudo mv /tmp/terraform/terraform /usr/local/bin/terraform
 
+    echo "Terraform version:"
     terraform version
   displayName: 'Install Terraform'
 
 
 # 4. Terraform Format Check
 - script: |
+    echo "======================================"
+    echo "Terraform Format Check"
+    echo "======================================"
+
     terraform fmt -check -recursive
   displayName: 'Terraform Format Check'
 
 
 # 5. Terraform Init - Staging
+# CI validation only: Azure remote backend is NOT touched
 - script: |
     echo "======================================"
     echo "Terraform Init - Staging"
@@ -90,5 +96,10 @@ steps:
 
     cd "$(Build.SourcesDirectory)/pipeline/environment/staging"
 
+    echo "Current directory:"
+    pwd
+
+    echo ""
+    echo "Running Terraform Validate..."
     terraform validate
   displayName: 'Terraform Validate - Staging'
