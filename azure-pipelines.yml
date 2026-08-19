@@ -1,5 +1,8 @@
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - feature-storage-backend
 
 pool:
   vmImage: ubuntu-latest
@@ -10,23 +13,29 @@ steps:
 - checkout: self
   displayName: 'Checkout GitHub Code'
 
-# 2. Verify repository structure
+
+# 2. Verify source code
 - script: |
     echo "======================================"
-    echo "VERIFY GITHUB SOURCE"
+    echo "GITHUB SOURCE VERIFICATION"
     echo "======================================"
 
-    echo ""
     echo "Current directory:"
     pwd
 
     echo ""
-    echo "Terraform environments:"
-    find "$(System.DefaultWorkingDirectory)/pipeline/environment" \
-      -maxdepth 2 -type f \
-      \( -name "*.tf" -o -name "*.tfvars" \) | sort
+    echo "Branch:"
+    git branch -a
 
+    echo ""
+    echo "Commit:"
+    git log -1 --oneline
+
+    echo ""
+    echo "Terraform files:"
+    find . -type f \( -name "*.tf" -o -name "*.tfvars" \) | sort
   displayName: 'Verify GitHub Source'
+
 
 # 3. Install Terraform
 - script: |
@@ -35,8 +44,7 @@ steps:
 
     TERRAFORM_VERSION="1.13.3"
 
-    curl -fsSL \
-      "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
       -o /tmp/terraform.zip
 
     unzip -o /tmp/terraform.zip -d /tmp/terraform
@@ -44,34 +52,43 @@ steps:
     sudo mv /tmp/terraform/terraform /usr/local/bin/terraform
 
     terraform version
-
   displayName: 'Install Terraform'
+
 
 # 4. Terraform Format Check
 - script: |
     terraform fmt -check -recursive
   displayName: 'Terraform Format Check'
 
+
 # 5. Terraform Init - Staging
 - script: |
-    cd "$(System.DefaultWorkingDirectory)/pipeline/environment/staging"
-
     echo "======================================"
     echo "Terraform Init - Staging"
     echo "======================================"
 
-    terraform init -backend=false
+    cd "$(Build.SourcesDirectory)/pipeline/environment/staging"
 
+    echo "Current directory:"
+    pwd
+
+    echo ""
+    echo "Staging files:"
+    ls -la
+
+    echo ""
+    echo "Running Terraform Init..."
+    terraform init -backend=false
   displayName: 'Terraform Init - Staging'
+
 
 # 6. Terraform Validate - Staging
 - script: |
-    cd "$(System.DefaultWorkingDirectory)/pipeline/environment/staging"
-
     echo "======================================"
     echo "Terraform Validate - Staging"
     echo "======================================"
 
-    terraform validate
+    cd "$(Build.SourcesDirectory)/pipeline/environment/staging"
 
+    terraform validate
   displayName: 'Terraform Validate - Staging'
