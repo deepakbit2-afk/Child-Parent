@@ -1,18 +1,17 @@
-# Local ADO repo trigger ko disable kiya hai
-trigger: none
+# Top-level trigger ko hi GitHub ke liye explicit set kar diya
+trigger:
+  branches:
+    include:
+      - main
+      - feature-storage-backend
 
-# GitHub repository ko as a resource aur trigger link kiya hai
+# Resources section se trigger block hata diya taaki duplicate na ho
 resources:
   repositories:
     - repository: github-repo
       type: github
       name: deepakbit2-afk/Child-Parent
       endpoint: deepakbit2-afk
-      trigger:
-        branches:
-          include:
-            - main
-            - feature-storage-backend
 
 pool:
   vmImage: ubuntu-latest
