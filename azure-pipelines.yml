@@ -1,8 +1,18 @@
-trigger:
-  branches:
-    include:
-      - main
-      - feature-storage-backend
+# Local ADO repo trigger ko disable kiya hai
+trigger: none
+
+# GitHub repository ko as a resource aur trigger link kiya hai
+resources:
+  repositories:
+    - repository: github-repo
+      type: github
+      name: deepakbit2-afk/Child-Parent
+      endpoint: deepakbit2-afk
+      trigger:
+        branches:
+          include:
+            - main
+            - feature-storage-backend
 
 pool:
   vmImage: ubuntu-latest
@@ -10,7 +20,7 @@ pool:
 steps:
 
 # 1. Checkout GitHub code
-- checkout: self
+- checkout: github-repo
   displayName: 'Checkout GitHub Code'
 
 
@@ -44,7 +54,7 @@ steps:
 
     TERRAFORM_VERSION="1.13.3"
 
-    curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    curl -fsSL "https://hashicorp.com{TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
       -o /tmp/terraform.zip
 
     unzip -o /tmp/terraform.zip -d /tmp/terraform
