@@ -1,17 +1,8 @@
-# Top-level trigger ko hi GitHub ke liye explicit set kar diya
 trigger:
   branches:
     include:
       - main
       - feature-storage-backend
-
-# Resources section se trigger block hata diya taaki duplicate na ho
-resources:
-  repositories:
-    - repository: github-repo
-      type: github
-      name: deepakbit2-afk/Child-Parent
-      endpoint: deepakbit2-afk
 
 pool:
   vmImage: ubuntu-latest
@@ -19,11 +10,11 @@ pool:
 steps:
 
 # 1. Checkout GitHub code
-- checkout: github-repo
+- checkout: self
   displayName: 'Checkout GitHub Code'
 
 
-# 2. Verify GitHub source
+# 2. Verify source code
 - script: |
     echo "======================================"
     echo "GITHUB SOURCE VERIFICATION"
@@ -53,30 +44,24 @@ steps:
 
     TERRAFORM_VERSION="1.13.3"
 
-    curl -fsSL "https://hashicorp.com{TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
       -o /tmp/terraform.zip
 
     unzip -o /tmp/terraform.zip -d /tmp/terraform
 
     sudo mv /tmp/terraform/terraform /usr/local/bin/terraform
 
-    echo "Terraform version:"
     terraform version
   displayName: 'Install Terraform'
 
 
 # 4. Terraform Format Check
 - script: |
-    echo "======================================"
-    echo "Terraform Format Check"
-    echo "======================================"
-
     terraform fmt -check -recursive
   displayName: 'Terraform Format Check'
 
 
 # 5. Terraform Init - Staging
-# CI validation only: Azure remote backend is NOT touched
 - script: |
     echo "======================================"
     echo "Terraform Init - Staging"
@@ -105,10 +90,5 @@ steps:
 
     cd "$(Build.SourcesDirectory)/pipeline/environment/staging"
 
-    echo "Current directory:"
-    pwd
-
-    echo ""
-    echo "Running Terraform Validate..."
     terraform validate
   displayName: 'Terraform Validate - Staging'
