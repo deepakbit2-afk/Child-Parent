@@ -5,6 +5,13 @@ terraform {
       version = "5.0.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "bhakua001-rg-tfstate"
+    storage_account_name = "bhakua001tfstate"
+    container_name       = "tfstate"
+    key                  = "staging.terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
@@ -34,11 +41,11 @@ module "storage_account" {
 
   config = {
     "default" = {
-      storage_account_name      = local.config.storage_account_name
-      resource_group_name       = module.resource_group.resource_group_name
-      location                  = local.config.location
-      account_tier              = local.config.account_tier
-      account_replication_type  = local.config.account_replication_type
+      storage_account_name     = local.config.storage_account_name
+      resource_group_name      = module.resource_group.resource_group_name
+      location                 = local.config.location
+      account_tier             = local.config.account_tier
+      account_replication_type = local.config.account_replication_type
     }
   }
   common_tags = var.common_tags
@@ -53,7 +60,7 @@ module "container" {
   config = {
     "default" = {
       container_name        = local.config.container_name
-      storage_account_id      = module.storage_account.storage_account_id
+      storage_account_id    = module.storage_account.storage_account_id
       container_access_type = local.config.container_access_type
     }
   }
